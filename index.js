@@ -1,4 +1,3 @@
-// server.js or server.mjs
 import express from "express";
 import http from "http";
 import cors from "cors";
@@ -13,8 +12,15 @@ const io = new Server(server, {
 app.use(cors());
 app.use(express.json());
 
+let latestESPData = {}; // 🔁 Store latest received data
+
 app.get("/", (req, res) => {
   res.send("Socket.IO Server Running ✅");
+});
+
+// 📤 Return latest ESP data as JSON
+app.get("/data", (req, res) => {
+  res.json(latestESPData);
 });
 
 io.on("connection", (socket) => {
@@ -22,8 +28,9 @@ io.on("connection", (socket) => {
 
   socket.on("esp-data", (data) => {
     console.log("📡 Received from ESP/Client:", data);
+    latestESPData = data; // 🔁 Save it
 
-    // Optionally respond with a command
+    // 🔁 Optional: Respond with command
     socket.emit("cmd-to-esp", { led: "on" });
   });
 });
